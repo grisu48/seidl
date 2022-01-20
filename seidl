@@ -37,18 +37,20 @@ def list_azure(environment="PublicAzure"):
     images = fetch_images("microsoft")
     # Filter by environment
     images = filter(lambda x: x["environment"] == environment, images)
-    print("# %-58s | %-80s | %-20s" % ("URN", "Name", "State"))
+    # Filter weird entries
+    images = filter(lambda x : x['name'].startswith("suse-"), images)
+    print("# %-58s | %-60s | %-20s" % ("URN", "Name", "State"))
     for i in images:
-        print("%-60s | %-80s | %2-0s" % (i["urn"], i["name"], i["state"]))
+        print("%-60s | %-60s | %-20s" % (i["urn"], i["name"], i["state"]))
 
 
 def list_aws(region):
     images = fetch_images("amazon")
     # Filter by region
     images = filter(lambda x: x["region"] == region, images)
-    print("# %-23s | %-80s | %-20s" % ("ID", "Name", "State"))
+    print("# %-23s | %-60s | %-20s" % ("ID", "Name", "State"))
     for i in images:
-        print("%-25s | %-80s | %-20s" % (i["id"], i["name"], i["state"]))
+        print("%-25s | %-60s | %-20s" % (i["id"], i["name"], i["state"]))
 
 
 def list_aws_regions():
