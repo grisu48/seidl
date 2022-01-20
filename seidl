@@ -38,7 +38,7 @@ def list_azure(environment="PublicAzure"):
     # Filter by environment
     images = filter(lambda x: x["environment"] == environment, images)
     # Filter weird entries
-    images = filter(lambda x : x['name'].startswith("suse-"), images)
+    images = filter(lambda x: x["name"].startswith("suse-"), images)
     print("# %-58s | %-60s | %-20s" % ("URN", "Name", "State"))
     for i in images:
         print("%-60s | %-60s | %-20s" % (i["urn"], i["name"], i["state"]))
@@ -104,14 +104,14 @@ if __name__ == "__main__":
             or arg == "m"
         ):
             csp.append("azure")
-        elif arg == "--region":
+        elif arg == "-r" or arg == "--region":
             i += 1
             args["region"] = sys.argv[i]
             continue
         elif arg == "--regions":
             list_aws_regions()
             sys.exit(0)
-        elif arg == "--env" or arg == "--environment":
+        elif arg == "-e" or arg == "--env" or arg == "--environment":
             i += 1
             args["environment"] = sys.argv[i]
             continue
@@ -129,8 +129,15 @@ if __name__ == "__main__":
             list_gce()
         elif cs == "amazon":
             if not "region" in args:
-                sys.stderr.write("Missing region argument for amazon\n")
+                sys.stderr.write(
+                    "Missing region argument for AWS (e.g. --region 'eu-west-1')\n"
+                )
+                sys.stderr.write(
+                    "Hint: Use %s --regions to list all regions (hidden feature!)\n"
+                    % (sys.argv[0])
+                )
                 sys.exit(1)
+            print("# Listing images for %s" % (args["region"]))
             list_aws(args["region"])
         elif cs == "azure" or cs == "microsoft":
             environment = "PublicAzure"
