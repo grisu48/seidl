@@ -6,6 +6,8 @@ In aims at complementing the [public-cloud-info-client](https://github.com/SUSE-
 
 ![Screenshot of seidl in action when querying the current Google images](seidl.png)
 
+`seidl` is named after a small beer quantity (typically 0.3 liters) in Austria because it's slightly smaller than a pint.
+
 ## Usage
 
     ./seidl gce                          # Query current GCE images
@@ -14,9 +16,9 @@ In aims at complementing the [public-cloud-info-client](https://github.com/SUSE-
 
 ## Installation
 
-This is a standalone python script with the following requirements:
+    install seidl ~/bin
 
-    requests
-    json
+This is a standalone python script (`seidl`) with the following requirements:
 
-It should work out of the box on most machines.
+* `requests`
+* `json`
