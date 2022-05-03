@@ -6,7 +6,9 @@ In aims at complementing the [public-cloud-info-client](https://github.com/SUSE-
 
 ![Screenshot of seidl in action when querying the current Google images](seidl.png)
 
-`seidl` is named after a small beer quantity (typically 0.3 liters) in Austria because it's slightly smaller than a pint.
+Image information are fetched from `https://susepubliccloudinfo.suse.com/v1/[microsoft|amazon|google]/images.json` and then parsed accordingly.
+
+`seidl` is named after a small beer quantity in Austria because it's slightly smaller than a pint (typically 0.3 liters).
 
 ## Usage
 

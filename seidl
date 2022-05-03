@@ -70,9 +70,9 @@ def printUsage():
     print("Usage: %s [OPTIONS] CSP..." % (sys.argv[0]))
     print("CSP              gce|aws|azure")
     print("OPTIONS:")
-    print("  --region                    Define region for AWS")
+    print("  --region                    Define region (required for AWS)")
     print("  --regions                   List all AWS regions")
-    print("  --environment               Define environment for Azure")
+    print("  --environment               Define environment (for Azure)")
     print("  --environments              List environment for Azure")
 
 
@@ -130,14 +130,14 @@ if __name__ == "__main__":
         elif cs == "amazon":
             if not "region" in args:
                 sys.stderr.write(
-                    "Missing region argument for AWS (e.g. --region 'eu-west-1')\n"
+                    "error: Missing region for AWS (e.g. --region 'eu-west-1')\n"
                 )
                 sys.stderr.write(
-                    "Hint: Use %s --regions to list all regions (hidden feature!)\n"
+                    "Hint: Use %s --regions to list all AWS regions)\n"
                     % (sys.argv[0])
                 )
                 sys.exit(1)
-            print("# Listing images for %s" % (args["region"]))
+            print("# Images for region: %s" % (args["region"]))
             list_aws(args["region"])
         elif cs == "azure" or cs == "microsoft":
             environment = "PublicAzure"
