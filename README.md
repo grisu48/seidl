@@ -10,6 +10,24 @@ Image information are fetched from `https://susepubliccloudinfo.suse.com/v1/[mic
 
 `seidl` is named after a small beer quantity in Austria because it's slightly smaller than a pint (typically 0.3 liters).
 
+## Usage
+
+    seidl -h                           # Print help
+    
+    seidl gce                          # Query current GCE images
+    seidl --region eu-west-1 aws       # Query current AWS images
+    seidl azure                        # Query current Azure images
+
+You can also filter results using the `-f` arguments. It supports a comma separated list of strings, where every entry of that list must be present in the image name
+
+    seidl -f sles,15-sp3 gce           # List GCE images, filter for SLES 15-SP3 images
+    seidl -f sles,15-sp3 azure gce     # List Azure and GCE images, filter for SLES 15-SP3 images
+
+Additional commands are:
+
+    seidl --list-aws-regions           # List available AWS regions
+    seidl --list-az-envs               # List possible Azure environments
+
 ## Build
 
 The lazy way:
@@ -22,23 +40,4 @@ Canonical go way:
 
     go build ./...
 
-Requirements: Pure `go` only, no external dependencies
-
-## Usage
-
-The basic usage is as follows:
-
-    ./seidl -h                           # Print help
-    
-    ./seidl gce                          # Query current GCE images
-    ./seidl --region eu-west-1 aws       # Query current AWS images
-    ./seidl azure                        # Query current Azure images
-
-You can also filter results using the `-f` arguments. It supports a comma separated list of strings, where every entry of that list must be present in the image name.
-
-Some more advanced examples are:
-
-    ./seidl -f sles,15-sp3 gce           # List GCE images, filter for SLES 15-SP3 images
-    ./seidl -f sles,15-sp3 azure gce     # List Azure and GCE images, filter for SLES 15-SP3 images
-    
-    ./seidl --list-aws-regions           # List available AWS regions
+Requirements: Pure `go`, no external dependencies required here.
