@@ -1,6 +1,6 @@
 # seidl
 
-`seidl` is a lightweight [pint](https://pint.suse.com/) client, designed for easy usage to query the current images of SUSE publiccloud images.
+`seidl` is a lightweight [pint](https://pint.suse.com/) query utility designed for easy usage. It displays the current SUSE publiccloud images according to customizable filter rules.
 
 In aims at complementing the [public-cloud-info-client](https://github.com/SUSE-Enceladus/public-cloud-info-client) by the feature to display all current not-deleted and not-deprecated images in a nice table on the console.
 
