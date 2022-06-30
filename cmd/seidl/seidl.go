@@ -15,6 +15,7 @@ const VERSION = "0.2"
 type Config struct {
 	Region string
 	Filter string // filtering string
+	format string // Preferred output format. Currently only "" (none) and "table" are supported. Defaults to ""
 }
 
 var config Config
@@ -95,6 +96,7 @@ func usage() {
 	fmt.Println("CSP (cloud service providers)   gce|aws|azure")
 	fmt.Println("OPTIONS:")
 	fmt.Println("  -f, --filter FILTER           Filter results based on the given strings (comma-separated)")
+	fmt.Println("  -n,--noformat                 Don't format output text as table")
 	fmt.Println("  --region                      Set region (required for AWS)")
 	fmt.Println("  --list-aws-regions            List AWS regions")
 	fmt.Println("  --az-env                      Set environment (for Azure)")
@@ -180,6 +182,7 @@ func isAWS(csp string) bool {
 }
 
 func main() {
+	config.format = "table"
 	// Parse program arguments, one after another
 	args := os.Args[1:]
 	if len(args) < 1 {
@@ -227,6 +230,8 @@ func main() {
 				} else if arg == "-r" || arg == "--region" {
 					i += 1
 					config.Region = args[i]
+				} else if arg == "-n" || arg == "--noformat" {
+					config.format = ""
 				} else if arg == "--list-az-envs" {
 					envs, err := GetAzureEnvironments()
 					if err != nil {
@@ -266,12 +271,18 @@ func main() {
 						}
 						os.Exit(1)
 					}
-					fmt.Println("################################################################################")
-					fmt.Printf("# %-44s # %-18s # %-8s #\n", "Name", "Project", "State")
-					for _, image := range images.Images {
-						fmt.Printf("| %-45s| %-18s | %-8s |\n", image.Name, image.Project, image.State)
+					if config.format == "table" {
+						fmt.Println("################################################################################")
+						fmt.Printf("# %-44s # %-18s # %-8s #\n", "Name", "Project", "State")
+						for _, image := range images.Images {
+							fmt.Printf("| %-45s| %-18s | %-8s |\n", image.Name, image.Project, image.State)
+						}
+						fmt.Println("################################################################################")
+					} else {
+						for _, image := range images.Images {
+							fmt.Printf("%-45s %-18s %-8s\n", image.Name, image.Project, image.State)
+						}
 					}
-					fmt.Println("################################################################################")
 				} else if isAWS(arg) {
 					images, err := FetchImages("amazon")
 					if err != nil {
@@ -289,18 +300,23 @@ func main() {
 						os.Exit(1)
 					}
 
-					// Note: I tried but because of the amount of information it's impossible to reduce it to 80 characters per line
-					if config.Region == "" {
-						fmt.Println("################################################################################################################")
-						fmt.Printf("# %-22s # %-55s # %-15s # %-9s #\n", "ID", "Name", "Region", "State")
-						for _, image := range images.Images {
-							fmt.Printf("| %-22s | %-55s | %-15s | %9s |\n", image.Id, image.Name, image.Region, image.State)
-						}
-						fmt.Println("################################################################################################################")
-					} else {
+					if config.Region != "" {
 						images.filterRegion(config.Region)
-						if len(images.Images) == 0 {
-							fmt.Fprintf(os.Stderr, "no images found for the given region\n")
+					}
+					if len(images.Images) == 0 {
+						fmt.Fprintf(os.Stderr, "no images found for the given region\n")
+						os.Exit(1)
+					}
+
+					if config.format == "table" {
+						// Note: I tried but because of the amount of information it's impossible to reduce it to 80 characters per line
+						if config.Region == "" {
+							fmt.Println("################################################################################################################")
+							fmt.Printf("# %-22s # %-55s # %-15s # %-9s #\n", "ID", "Name", "Region", "State")
+							for _, image := range images.Images {
+								fmt.Printf("| %-22s | %-55s | %-15s | %9s |\n", image.Id, image.Name, image.Region, image.State)
+							}
+							fmt.Println("################################################################################################################")
 						} else {
 							fmt.Println("################################################################################################")
 							fmt.Printf("# %-22s # %-55s # %-9s #\n", "ID", "Name", "State")
@@ -308,6 +324,16 @@ func main() {
 								fmt.Printf("| %-22s | %-55s | %9s |\n", image.Id, image.Name, image.State)
 							}
 							fmt.Println("################################################################################################")
+						}
+					} else {
+						if config.Region == "" {
+							for _, image := range images.Images {
+								fmt.Printf("%-22s %-55s %-15s %9s\n", image.Id, image.Name, image.Region, image.State)
+							}
+						} else {
+							for _, image := range images.Images {
+								fmt.Printf("%-22s %-55s %9s\n", image.Id, image.Name, image.State)
+							}
 						}
 					}
 				} else if isAzure(arg) {
@@ -325,12 +351,19 @@ func main() {
 						}
 						os.Exit(1)
 					}
-					fmt.Println("###########################################################################")
-					fmt.Printf("# %-48s # %-20s #\n", "URN", "State")
-					for _, image := range images.Images {
-						fmt.Printf("| %-48s | %20s |\n", image.URN, image.State)
+
+					if config.format == "table" {
+						fmt.Println("###########################################################################")
+						fmt.Printf("# %-48s # %-20s #\n", "URN", "State")
+						for _, image := range images.Images {
+							fmt.Printf("| %-48s | %20s |\n", image.URN, image.State)
+						}
+						fmt.Println("###########################################################################")
+					} else {
+						for _, image := range images.Images {
+							fmt.Printf("%-48s %20s\n", image.URN, image.State)
+						}
 					}
-					fmt.Println("###########################################################################")
 				} else {
 					fmt.Fprintf(os.Stderr, "error: invalid CSP\n")
 					os.Exit(1)
