@@ -27,6 +27,22 @@ Additional commands are:
 
     seidl --list-aws-regions           # List available AWS regions
     seidl --list-az-envs               # List possible Azure environments
+    seidl --noformat ...               # Don't format the output as a table
+
+## Install
+
+Checkout the [Releases](https://github.com/grisu48/seidl/releases) page of this repository.
+
+## openSUSE
+
+`seidl` is part of the openSUSE Tumbleweed packages and can be installed there via `zypper in seidl`.
+
+I build packages for openSUSE Leap in my [ph03nix:tools](https://build.opensuse.org/project/show/home:ph03nix:tools) repository. This is my personal "stable" repository (don't use my home repo, weird stuff happens there!).  
+For install instructions follow [this link](https://software.opensuse.org//download.html?project=home%3Aph03nix%3Atools&package=seidl) or try the following, if you understand what you are doing:
+
+    zypper addrepo https://download.opensuse.org/repositories/home:ph03nix:tools/15.4/home:ph03nix:tools.repo
+    zypper refresh
+    zypper install seidl
 
 ## Build
 
