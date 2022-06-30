@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-const VERSION = "0.1"
+const VERSION = "0.2"
 
 type Config struct {
 	Region string
@@ -68,18 +68,6 @@ func (i *Images) filterRegion(region string) {
 	n := 0
 	for _, val := range i.Images {
 		if val.Region == region {
-			i.Images[n] = val
-			n++
-		}
-	}
-	i.Images = i.Images[:n]
-}
-
-// Filter all images without the "suse-" prefix
-func (i *Images) filterSUSE() {
-	n := 0
-	for _, val := range i.Images {
-		if strings.HasPrefix(val.Name, "suse-") {
 			i.Images[n] = val
 			n++
 		}
@@ -278,10 +266,12 @@ func main() {
 						}
 						os.Exit(1)
 					}
-					fmt.Printf("| %-58s | %-40s | %-20s |\n", "Name", "Project", "State")
+					fmt.Println("################################################################################")
+					fmt.Printf("# %-44s # %-18s # %-8s #\n", "Name", "Project", "State")
 					for _, image := range images.Images {
-						fmt.Printf("%-60s | %-40s | %-20s\n", image.Name, image.Project, image.State)
+						fmt.Printf("| %-45s| %-18s | %-8s |\n", image.Name, image.Project, image.State)
 					}
+					fmt.Println("################################################################################")
 				} else if isAWS(arg) {
 					images, err := FetchImages("amazon")
 					if err != nil {
@@ -298,16 +288,26 @@ func main() {
 						}
 						os.Exit(1)
 					}
+
+					// Note: I tried but because of the amount of information it's impossible to reduce it to 80 characters per line
 					if config.Region == "" {
-						fmt.Printf("| %-23s | %-60s | %-20s | %-20s |\n", "ID", "Name", "Region", "State")
+						fmt.Println("################################################################################################################")
+						fmt.Printf("# %-22s # %-55s # %-15s # %-9s #\n", "ID", "Name", "Region", "State")
 						for _, image := range images.Images {
-							fmt.Printf("%-25s | %-60s | %-20s | %-20s\n", image.Id, image.Name, image.Region, image.State)
+							fmt.Printf("| %-22s | %-55s | %-15s | %9s |\n", image.Id, image.Name, image.Region, image.State)
 						}
+						fmt.Println("################################################################################################################")
 					} else {
 						images.filterRegion(config.Region)
-						fmt.Printf("| %-23s | %-60s | %-20s |\n", "ID", "Name", "State")
-						for _, image := range images.Images {
-							fmt.Printf("%-25s | %-60s | %-20s\n", image.Id, image.Name, image.State)
+						if len(images.Images) == 0 {
+							fmt.Fprintf(os.Stderr, "no images found for the given region\n")
+						} else {
+							fmt.Println("################################################################################################")
+							fmt.Printf("# %-22s # %-55s # %-9s #\n", "ID", "Name", "State")
+							for _, image := range images.Images {
+								fmt.Printf("| %-22s | %-55s | %9s |\n", image.Id, image.Name, image.State)
+							}
+							fmt.Println("################################################################################################")
 						}
 					}
 				} else if isAzure(arg) {
@@ -316,8 +316,6 @@ func main() {
 						fmt.Fprintf(os.Stderr, "error: %s\n", err)
 						os.Exit(1)
 					}
-					// Filter out weird entries
-					images.filterSUSE()
 					n := images.filter(config.Filter)
 					if len(images.Images) == 0 {
 						if n == 0 {
@@ -327,10 +325,12 @@ func main() {
 						}
 						os.Exit(1)
 					}
-					fmt.Printf("| %-58s | %-60s | %-20s\n", "URN", "Name", "State")
+					fmt.Println("###########################################################################")
+					fmt.Printf("# %-48s # %-20s #\n", "URN", "State")
 					for _, image := range images.Images {
-						fmt.Printf("%-60s | %-60s | %-20s\n", image.URN, image.Name, image.State)
+						fmt.Printf("| %-48s | %20s |\n", image.URN, image.State)
 					}
+					fmt.Println("###########################################################################")
 				} else {
 					fmt.Fprintf(os.Stderr, "error: invalid CSP\n")
 					os.Exit(1)
