@@ -12,22 +12,28 @@ Image information are fetched from `https://susepubliccloudinfo.suse.com/v1/[mic
 
 ## Usage
 
-    seidl -h                           # Print help
-    
-    seidl gce                          # Query current GCE images
-    seidl --region eu-west-1 aws       # Query current AWS images
-    seidl azure                        # Query current Azure images
+```
+seidl -h                           # Print help
+
+seidl gce                          # Query current GCE images
+seidl --region eu-west-1 aws       # Query current AWS images
+seidl azure                        # Query current Azure images
+````
 
 You can also filter results using the `-f` arguments. It supports a comma separated list of strings, where every entry of that list must be present in the image name
 
-    seidl -f sles,15-sp3 gce           # List GCE images, filter for SLES 15-SP3 images
-    seidl -f sles,15-sp3 azure gce     # List Azure and GCE images, filter for SLES 15-SP3 images
+```
+seidl -f sles,16-0 gce           # List GCE images, filter for SLES 15-SP3 images
+seidl -f sles,15-sp7 azure gce     # List Azure and GCE images, filter for SLES 15-SP3 images
+````
 
 Additional commands are:
 
-    seidl --list-aws-regions           # List available AWS regions
-    seidl --list-az-envs               # List possible Azure environments
-    seidl --noformat ...               # Don't format the output as a table
+```
+seidl --list-aws-regions           # List available AWS regions
+seidl --list-az-envs               # List possible Azure environments
+seidl --noformat ...               # Don't format the output as a table
+```
 
 ## Install
 
@@ -35,25 +41,23 @@ Checkout the [Releases](https://github.com/grisu48/seidl/releases) page of this 
 
 ## openSUSE
 
-`seidl` is part of the openSUSE Tumbleweed packages and can be installed there via `zypper in seidl`.
+`seidl` is part of openSUSE Tumbleweed and can be installed there via `zypper in seidl`.
 
-I build packages for openSUSE Leap in my [ph03nix:tools](https://build.opensuse.org/project/show/home:ph03nix:tools) repository. This is my personal "stable" repository (don't use my home repo, weird stuff happens there!).  
-For install instructions follow [this link](https://software.opensuse.org//download.html?project=home%3Aph03nix%3Atools&package=seidl) or try the following, if you understand what you are doing:
-
-    zypper addrepo https://download.opensuse.org/repositories/home:ph03nix:tools/15.4/home:ph03nix:tools.repo
-    zypper refresh
-    zypper install seidl
+Since at least Leap 16.0 it is also part of the main Leap repositories.
 
 ## Build
 
 The lazy way:
 
-    make
+```
+make
+make seidl install                 # the very lazy way. Build and install to ~/bin
+```
 
-    make seidl install                 # the very lazy way. Build and install to ~/bin
+The `go` way:
 
-Canonical go way:
+```
+go build ./...
+```
 
-    go build ./...
-
-Requirements: Pure `go`, no external dependencies required here.
+Requirements: Pure `go`, no external dependencies required.
