@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-const VERSION = "0.2"
+const VERSION = "0.3"
 
 type Config struct {
 	Region string
