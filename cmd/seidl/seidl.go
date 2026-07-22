@@ -76,6 +76,80 @@ func (i *Images) filterRegion(region string) {
 	i.Images = i.Images[:n]
 }
 
+func HashSeparator(n int) string {
+	var sb strings.Builder
+	for i := 0; i < n; i++ {
+		sb.WriteRune('#')
+	}
+	return sb.String()
+}
+
+// Print all images as a Table
+func (images *Images) PrintGCETable() {
+	separator := HashSeparator(90)
+	fmt.Println(separator)
+	fmt.Printf("# %-54s # %-18s # %-8s #\n", "Name", "Project", "State")
+	for _, image := range images.Images {
+		fmt.Printf("| %-55s| %-18s | %-8s |\n", image.Name, image.Project, image.State)
+	}
+	fmt.Println(separator)
+}
+
+// Print all images as a List
+func (images *Images) PrintGCE() {
+	for _, image := range images.Images {
+		fmt.Printf("%-55s %-18s %-8s\n", image.Name, image.Project, image.State)
+	}
+}
+
+func (images *Images) PrintAWSTable(region string) {
+	if region == "" {
+		separator := HashSeparator(114)
+		fmt.Println(separator)
+		fmt.Printf("# %-22s # %-55s # %-15s # %-9s #\n", "ID", "Name", "Region", "State")
+		for _, image := range images.Images {
+			fmt.Printf("| %-22s | %-55s | %-15s | %9s |\n", image.Id, image.Name, image.Region, image.State)
+		}
+		fmt.Println(separator)
+	} else {
+		separator := HashSeparator(114)
+		fmt.Println(96)
+		fmt.Printf("# %-22s # %-55s # %-9s #\n", "ID", "Name", "State")
+		for _, image := range images.Images {
+			fmt.Printf("| %-22s | %-55s | %9s |\n", image.Id, image.Name, image.State)
+		}
+		fmt.Println(separator)
+	}
+}
+
+func (images *Images) PrintAWS(region string) {
+	if region == "" {
+		for _, image := range images.Images {
+			fmt.Printf("%-22s %-55s %-15s %9s\n", image.Id, image.Name, image.Region, image.State)
+		}
+	} else {
+		for _, image := range images.Images {
+			fmt.Printf("%-22s %-55s %9s\n", image.Id, image.Name, image.State)
+		}
+	}
+}
+
+func (images *Images) PrintAzureTable() {
+	separator := HashSeparator(85)
+	fmt.Println(separator)
+	fmt.Printf("# %-58s # %-20s #\n", "URN", "State")
+	for _, image := range images.Images {
+		fmt.Printf("| %-58s | %20s |\n", image.URN, image.State)
+	}
+	fmt.Println(separator)
+}
+
+func (images *Images) PrintAzure() {
+	for _, image := range images.Images {
+		fmt.Printf("%-48s %20s\n", image.URN, image.State)
+	}
+}
+
 func (i *Image) filter(filter string) bool {
 	if filter == "" {
 		return true
@@ -218,21 +292,22 @@ func main() {
 				continue
 			}
 			if arg[0] == '-' { // Configuration parameter
-				if arg == "-h" || arg == "--help" {
+				switch arg {
+				case "-h", "--help":
 					usage()
 					return
-				} else if arg == "--version" {
+				case "--version":
 					fmt.Printf("seidl v%s -- https://github.com/grisu48/seidl/\n", VERSION)
 					return
-				} else if arg == "-f" || arg == "--filter" {
+				case "-f", "--filter":
 					i += 1
 					config.Filter = args[i]
-				} else if arg == "-r" || arg == "--region" {
+				case "-r", "--region":
 					i += 1
 					config.Region = args[i]
-				} else if arg == "-n" || arg == "--noformat" {
+				case "-n", "--noformat":
 					config.format = ""
-				} else if arg == "--list-az-envs" {
+				case "--list-az-envs":
 					envs, err := GetAzureEnvironments()
 					if err != nil {
 						fmt.Fprintf(os.Stderr, "error fetching environments: %s\n", err)
@@ -241,7 +316,7 @@ func main() {
 					for _, env := range envs {
 						fmt.Printf("%s\n", env.Name)
 					}
-				} else if arg == "--list-aws-regions" {
+				case "--list-aws-regions":
 					envs, err := GetAWSRegions()
 					if err != nil {
 						fmt.Fprintf(os.Stderr, "error fetching regions: %s\n", err)
@@ -250,7 +325,7 @@ func main() {
 					for _, env := range envs.Regions {
 						fmt.Printf("%s\n", env.Name)
 					}
-				} else {
+				default:
 					fmt.Fprintf(os.Stderr, "invalid parameter: %s\n", arg)
 					os.Exit(1)
 				}
@@ -272,16 +347,9 @@ func main() {
 						os.Exit(1)
 					}
 					if config.format == "table" {
-						fmt.Println("################################################################################")
-						fmt.Printf("# %-44s # %-18s # %-8s #\n", "Name", "Project", "State")
-						for _, image := range images.Images {
-							fmt.Printf("| %-45s| %-18s | %-8s |\n", image.Name, image.Project, image.State)
-						}
-						fmt.Println("################################################################################")
+						images.PrintGCETable()
 					} else {
-						for _, image := range images.Images {
-							fmt.Printf("%-45s %-18s %-8s\n", image.Name, image.Project, image.State)
-						}
+						images.PrintGCE()
 					}
 				} else if isAWS(arg) {
 					images, err := FetchImages("amazon")
@@ -309,32 +377,9 @@ func main() {
 					}
 
 					if config.format == "table" {
-						// Note: I tried but because of the amount of information it's impossible to reduce it to 80 characters per line
-						if config.Region == "" {
-							fmt.Println("################################################################################################################")
-							fmt.Printf("# %-22s # %-55s # %-15s # %-9s #\n", "ID", "Name", "Region", "State")
-							for _, image := range images.Images {
-								fmt.Printf("| %-22s | %-55s | %-15s | %9s |\n", image.Id, image.Name, image.Region, image.State)
-							}
-							fmt.Println("################################################################################################################")
-						} else {
-							fmt.Println("################################################################################################")
-							fmt.Printf("# %-22s # %-55s # %-9s #\n", "ID", "Name", "State")
-							for _, image := range images.Images {
-								fmt.Printf("| %-22s | %-55s | %9s |\n", image.Id, image.Name, image.State)
-							}
-							fmt.Println("################################################################################################")
-						}
+						images.PrintAWSTable(config.Region)
 					} else {
-						if config.Region == "" {
-							for _, image := range images.Images {
-								fmt.Printf("%-22s %-55s %-15s %9s\n", image.Id, image.Name, image.Region, image.State)
-							}
-						} else {
-							for _, image := range images.Images {
-								fmt.Printf("%-22s %-55s %9s\n", image.Id, image.Name, image.State)
-							}
-						}
+						images.PrintAWS(config.Region)
 					}
 				} else if isAzure(arg) {
 					images, err := FetchImages("microsoft")
@@ -353,16 +398,9 @@ func main() {
 					}
 
 					if config.format == "table" {
-						fmt.Println("###########################################################################")
-						fmt.Printf("# %-48s # %-20s #\n", "URN", "State")
-						for _, image := range images.Images {
-							fmt.Printf("| %-48s | %20s |\n", image.URN, image.State)
-						}
-						fmt.Println("###########################################################################")
+						images.PrintAzureTable()
 					} else {
-						for _, image := range images.Images {
-							fmt.Printf("%-48s %20s\n", image.URN, image.State)
-						}
+						images.PrintAzure()
 					}
 				} else {
 					fmt.Fprintf(os.Stderr, "error: invalid CSP\n")
